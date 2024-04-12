@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -164,7 +164,7 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+vim.keymap.set('n', '<leader>fd', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
@@ -189,6 +189,21 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- Allow moving the cursor through wrapped lines with j, k, <Up> and <Down>
+vim.keymap.set('n', 'j', 'v:count || mode(1)[0:1] == "no" ? "j" : "gj"', { expr = true })
+vim.keymap.set('n', 'k', 'v:count || mode(1)[0:1] == "no" ? "k" : "gk"', { expr = true })
+vim.keymap.set('x', 'j', 'v:count || mode(1)[0:1] == "no" ? "j" : "gj"', { expr = true })
+vim.keymap.set('x', 'k', 'v:count || mode(1)[0:1] == "no" ? "k" : "gk"', { expr = true })
+
+-- Don't copy the replaced text after pasting in visual mode
+vim.keymap.set('x', 'p', 'p:let @+=@0<CR>:let @"=@0<CR>', { silent = true })
+
+-- center when moving
+vim.keymap.set('n', '<C-d>', '<C-d>zz', {})
+vim.keymap.set('n', '<C-u>', '<C-u>zz', {})
+vim.keymap.set('n', 'n', 'nzz', {})
+vim.keymap.set('n', 'N', 'Nzz', {})
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -238,7 +253,21 @@ require('lazy').setup({
   --    require('Comment').setup({})
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  {
+    'numToStr/Comment.nvim',
+    opts = {},
+    lazy = false,
+    config = function()
+      require('Comment').setup {
+        toggler = {
+          line = '<leader>/',
+        },
+        opleader = {
+          line = '<leader>/',
+        },
+      }
+    end,
+  },
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
@@ -256,6 +285,45 @@ require('lazy').setup({
         changedelete = { text = '~' },
       },
     },
+  },
+
+  {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    opts = {}, -- this is equalent to setup({}) function
+  },
+
+  {
+    'goolord/alpha-nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      local alpha = require 'alpha'
+      local startify = require 'alpha.themes.startify'
+
+      startify.section.header.val = {
+        [[      ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀           ]],
+        [[  ⢀⣀⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣶⣮⣼⠻⣿⣵  ]],
+        [[  ⣿⢿⣋⡶⠾⠟⢷⢶⡤⢄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⢴⡮⠛⣯⡯⠄⢄⣼⠛⣿⡾  ]],
+        [[  ⢻⣿⣉⡷⠒⠒⠛⡾⢍⣹⣯⣵⣤⡀⠀⠀⠀⠠⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡤⠂⠀⠀⢀⡤⢟⣻⣾⣷⣊⣽⠷⠤⣤⡾⠿⣸⠇  ]],
+        [[  ⠈⣷⡞⢻⡿⠛⠛⢻⣶⣚⡛⣿⣶⣍⣳⣄⡀⠀⠀⠉⠢⡀⠀⠀⠀⠀⠀⠀⠀⡔⠁⠀⠀⢠⣼⠧⠶⠛⢟⠶⠖⠿⣿⣤⣄⣞⡷⣾⠏⠀  ]],
+        [[  ⠀⠈⢿⡻⣧⡷⠶⣿⠛⠉⠉⠑⡀⠀⠁⠙⠛⣦⡀⠀⠀⠑⡄⠀⠀⠀⠀⢀⠜⠀⠀⢀⡴⠛⠀⠀⠀⢀⠁⠀⠀⠀⣹⡇⣈⣯⣿⠋⠀⠀  ]],
+        [[  ⠀⠀⠀⠻⣷⣧⣤⣿⣄⠀⠀⢀⣘⣀⠀⠀⠀⠀⠛⢦⡀⠀⠈⢆⠀⠀⠀⠎⠀⢀⣴⠟⠀⠀⠀⢀⠔⠚⠂⠂⠤⢴⣿⣟⣹⣿⡇⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⢿⣾⣦⢿⡿⠉⠁⠀⠀⠀⠉⢢⠀⠀⠀⠀⠙⢦⡀⠈⡆⠀⡜⠀⣠⠞⠁⠀⠀⠀⢰⠀⠀⠀⠀⠀⠀⠀⣟⣉⣟⣿⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠈⣯⣷⣤⢯⣀⢀⡀⡀⡠⠤⠖⠓⠠⢀⡀⠀⠀⠙⣆⢸⣶⡅⡴⠋⠀⢀⡀⠐⠈⠉⠙⠂⠒⠒⠂⠲⣾⣉⣿⣻⡇⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⢹⣾⣷⣾⡏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠐⠤⣀⠈⢻⣿⡟⢀⡠⠒⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⢻⣿⠁⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⠀⣿⣥⣽⣧⣀⠀⣀⣤⣤⣶⣶⣤⣤⣤⣠⣠⣠⣭⣿⣿⣿⣧⣤⣤⣤⣶⣶⣷⣿⣿⣷⣷⣶⣤⣴⣿⣿⣿⡏⠀⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⠀⠘⢿⣿⣿⣿⠿⠛⠛⠉⠛⢻⠍⠍⠭⠌⠚⠈⡼⣿⣿⣿⠧⡁⠑⠒⠒⠂⠐⠪⠀⠀⠀⠀⠉⠹⣿⠿⣷⠀⠀⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⠀⠀⣾⢋⣽⣇⣀⣀⡀⠄⣠⠂⠀⠀⠀⠀⡠⠚⠠⠃⣿⡎⢆⠑⠢⣀⠀⠀⠀⠀⠹⠐⠒⠒⠒⠾⣿⠷⡿⡀⠀⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⠀⠀⣟⣏⡿⠋⠀⠀⠀⢀⠆⠀⢀⣠⠔⠋⠀⢀⠎⢘⣿⡗⡀⢆⠀⠈⠙⢲⢤⣀⡀⠡⣀⠀⠀⠀⠈⣟⣿⡇⠀⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⠀⠀⣷⢿⣳⣀⣀⠄⠒⢋⠲⠛⠁⠠⠀⠀⢀⢪⢠⠃⣿⡇⢣⠠⠣⡀⠀⠀⠄⠀⠙⠠⡁⠁⠑⠲⣾⣾⣵⡇⠀⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⠀⠀⢾⣻⣿⣿⠀⢀⡔⠁⠀⠀⢠⠁⠀⠠⠃⣸⠇⠀⢽⠃⠀⢳⡆⠐⠄⠀⠈⠄⠀⠀⠈⢲⣄⣴⣟⡿⡾⠃⠀⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⠀⠀⠈⢻⣹⣽⣷⣿⡀⠀⠀⣠⠁⠀⡠⠃⢀⡟⠀⠀⠀⠀⠀⠈⢳⡀⠈⢆⠀⠈⣦⣀⣠⣴⢿⣿⣛⡷⠃⠀⠀⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢬⡿⢯⣿⣛⡿⢿⣤⢶⡇⢀⡞⠀⠀⠀⠀⠀⠀⠀⠀⠳⣄⣘⡷⢶⣛⣿⣭⢿⣯⠿⠉⠀⠀⠀⠀⠀⠀⠀⠀  ]],
+        [[  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠳⢻⣯⣿⣳⡮⠟⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠙⠹⠿⠳⠺⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀  ]],
+        [[      ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀           ]],
+      }
+      alpha.setup(startify.opts)
+    end,
   },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
@@ -378,7 +446,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
-      vim.keymap.set('n', '<leader>/', function()
+      vim.keymap.set('n', '<leader>sq', function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
           winblend = 10,
@@ -551,6 +619,7 @@ require('lazy').setup({
         -- tsserver = {},
         --
 
+        hls = {},
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -603,7 +672,7 @@ require('lazy').setup({
     lazy = false,
     keys = {
       {
-        '<leader>f',
+        '<leader>fm',
         function()
           require('conform').format { async = true, lsp_fallback = true }
         end,
@@ -777,7 +846,7 @@ require('lazy').setup({
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
+      -- require('mini.surround').setup()
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
