@@ -647,6 +647,7 @@ require('lazy').setup({
             },
           },
         },
+        tsserver = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -712,7 +713,7 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        javascript = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -884,7 +885,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'haskell', 'javascript' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
